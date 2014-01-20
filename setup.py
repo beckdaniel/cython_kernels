@@ -3,6 +3,7 @@
 
 import os
 from setuptools import setup
+from Cython.Build import cythonize
 
 # Version number
 version = '0.1'
@@ -16,4 +17,5 @@ setup(name = 'cython_kernels',
       package_dir={'GPy': 'GPy'},
       long_description=read('README.md'),
       install_requires=['nltk'],
+      ext_modules = cythonize("cython_kernels/tk/cy_sst.pyx")
       )
