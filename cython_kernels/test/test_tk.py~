@@ -1,0 +1,13 @@
+
+
+import unittest
+import nltk
+from cython_kernels.tk import SubsetTreeKernel as SST
+
+class SSTTests(unittest.TestCase):
+
+    def test_parse(self):
+        tree1 = nltk.Tree("(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))")
+        k = SST()
+        nodes1 = k._gen_node_list(tree1)
+        print nodes1
