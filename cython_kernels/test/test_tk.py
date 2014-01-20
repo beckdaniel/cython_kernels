@@ -73,7 +73,7 @@ class SSTProfilingTests(unittest.TestCase):
                      dtype=object)
         k = SST()
         target = np.zeros(shape=(len(X), len(X)))
-        ITS = 2000
+        ITS = 3000
         start_time = datetime.datetime.now()
         for i in range(ITS):
             k.K(X, None, target)

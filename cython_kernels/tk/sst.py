@@ -122,11 +122,10 @@ class SubsetTreeKernel(object):
         K_vec = np.zeros(shape=(len(X),))
         ddecay_vec = np.zeros(shape=(len(X),))
         for i, x in enumerate(X):
-            node_list = self._get_node_pair_list(self._tree_cache[x[0]], self._tree_cache[x[0]])
+            nodes = self._tree_cache[x[0]]
+            node_list = self._get_node_pair_list(nodes, nodes)
             delta_result = 0
             ddecay = 0
-            cache = {} # DP
-            cache_ddecay = {}
             # Calculation happens here.
             delta_result, ddecay = self.delta(node_list)
             K_vec[i] = delta_result
@@ -134,6 +133,8 @@ class SubsetTreeKernel(object):
         return (K_vec, ddecay_vec)
 
     def delta(self, node_list):
+        return cy_sst.cy_delta(node_list, self._lambda)
+
         cache_delta = defaultdict(int) # DP
         cache_ddecay = defaultdict(int)
         for node_pair in node_list:
@@ -157,3 +158,6 @@ class SubsetTreeKernel(object):
                 cache_ddecay[key] = prod + (delta_result * sum_decay)
         return (sum(cache_delta.values()),
                 sum(cache_ddecay.values()))
+
+    def delta_cy(self, node_list):
+        return cy_sst.cy_delta(node_list)
