@@ -11,20 +11,23 @@ class SSTTests(unittest.TestCase):
     def test_gen_node_list(self):
         repr1 = "(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))"
         k = SST()
-        nodes1 = k._gen_node_list(repr1)
-        result = "[(ADJ -> 'colorless', (0, 0)), (ADV -> 'furiously', (1, 1)), (N -> 'ideas', (0, 1)), (NP -> ADJ N, (0,)), (S -> NP VP, ()), (V -> 'sleep', (1, 0)), (VP -> V ADV, (1,))]"
+        nodes1, dict1 = k._gen_node_list(repr1)
+        result = "[('ADJ colorless', 0, None), ('ADV furiously', 4, None), ('N ideas', 1, None), ('NP ADJ N', 2, [0, 1]), ('S NP VP', 6, [2, 5]), ('V sleep', 3, None), ('VP V ADV', 5, [3, 4])]"
+        print nodes1
         self.assertEqual(str(nodes1), result)
 
-    def test_get_node_pair_list(self):
+    @unittest.skip("skip")
+    def test_get_node_pairs1(self):
         repr1 = "(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))"
         repr2 = "(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))"
         k = SST()
-        nodes1 = k._gen_node_list(repr1)
-        nodes2 = k._gen_node_list(repr2)
-        node_list = k._get_node_pair_list(nodes1, nodes2)
-        result = "[((0, 0), (0, 0), 0), ((1, 1), (1, 1), 0), ((0, 1), (0, 1), 0), ((1, 0), (1, 0), 0), ((0,), (0,), 2), ((1,), (1,), 2), ((), (), 2)]"
+        nodes1, dict1 = k._gen_node_list(repr1)
+        nodes2, dict2 = k._gen_node_list(repr2)
+        node_list = k._get_node_pairs(nodes1, nodes2)
+        result = "[(('ADJ colorless', 0, None), ('ADJ colorless', 0, None)), (('N ideas', 1, None), ('N ideas', 1, None)), (('NP ADJ N', 2, [0, 1]), ('NP ADJ N', 2, [0, 1])), (('V sleep', 3, None), ('V sleep', 3, None)), (('VP V ADV', 5, [3, 4]), ('VP V ADV', 5, [3, 4]))]"
         self.assertEqual(str(node_list), result)
 
+    @unittest.skip("cy")
     def test_get_node_pair_list_cy(self):
         repr1 = "(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))"
         repr2 = "(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))"
@@ -35,6 +38,25 @@ class SSTTests(unittest.TestCase):
         result = "[((0, 0), (0, 0), 0), ((1, 1), (1, 1), 0), ((0, 1), (0, 1), 0), ((1, 0), (1, 0), 0), ((0,), (0,), 2), ((1,), (1,), 2), ((), (), 2)]"
         self.assertEqual(str(node_list), result)
 
+    def test_get_node_pairs2(self):
+        repr1 = '(S (NP ns) (VP v))'
+        repr2 = '(S (NP (N a)) (VP (V c)))'
+        k = SST()
+        nodes1, dict1 = k._gen_node_list(repr1)
+        nodes2, dict2 = k._gen_node_list(repr2)
+        node_list = k._get_node_pairs(nodes1, nodes2)
+        print node_list
+        print dict1
+        print dict2
+
+    def test_get_node_pairs2(self):
+        repr1 = '(S (NP ns) (VP v))'
+        repr2 = '(S (NP (N a)) (VP (V c)))'
+        k = SST()
+        nodes1, dict1 = k._gen_node_list(repr1)
+        nodes2, dict2 = k._gen_node_list(repr2)
+        node_list = k._get_node_pairs(nodes1, nodes2)
+        print k.calc_K(node_list, dict1, dict2)
 
 class SSTProfilingTests(unittest.TestCase):
 
@@ -64,6 +86,7 @@ class SSTProfilingTests(unittest.TestCase):
         end_time = datetime.datetime.now()
         print end_time - start_time
 
+    #@unittest.skip("skip")
     def test_prof_K(self):
         X = np.array([['(S (NP ns) (VP v))'],
                       ['(S (NP n) (VP v))'],
