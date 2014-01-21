@@ -58,6 +58,25 @@ class SSTTests(unittest.TestCase):
         node_list = k._get_node_pairs(nodes1, nodes2)
         print k.calc_K(node_list, dict1, dict2)
 
+    def test_K(self):
+        X = np.array([['(S (NP ns) (VP v))'],
+                      ['(S (NP n) (VP v))'],
+                      ['(S (NP (N a)) (VP (V c)))'],
+                      ['(S (NP (Det a) (N b)) (VP (V c)))'],
+                      ['(S (NP (ADJ colorless) (N ideas)) (VP (V sleep) (ADV furiously)))']],
+                     dtype=object)
+        k = SST()
+        target = np.zeros(shape=(len(X), len(X)))
+        k.K(X, None, target)
+        result = [[ 1.,          0.5,         0.10540926,  0.08333333,  0.06711561],
+                  [ 0.5,         1.,          0.10540926,  0.08333333,  0.06711561],
+                  [ 0.10540926,  0.10540926,  1.,          0.31622777,  0.04244764],
+                  [ 0.08333333,  0.08333333,  0.31622777,  1.,          0.0335578 ],
+                  [ 0.06711561,  0.06711561,  0.04244764,  0.0335578,   1.        ]]
+        self.assertAlmostEqual(np.sum(result), np.sum(target))
+
+
+
 class SSTProfilingTests(unittest.TestCase):
 
     @unittest.skip("skip")
