@@ -49,15 +49,6 @@ class SSTTests(unittest.TestCase):
         print dict1
         print dict2
 
-    def test_get_node_pairs2(self):
-        repr1 = '(S (NP ns) (VP v))'
-        repr2 = '(S (NP (N a)) (VP (V c)))'
-        k = SST()
-        nodes1, dict1 = k._gen_node_list(repr1)
-        nodes2, dict2 = k._gen_node_list(repr2)
-        node_list = k._get_node_pairs(nodes1, nodes2)
-        print k.calc_K(node_list, dict1, dict2)
-
     def test_K(self):
         X = np.array([['(S (NP ns) (VP v))'],
                       ['(S (NP n) (VP v))'],
@@ -115,7 +106,7 @@ class SSTProfilingTests(unittest.TestCase):
                      dtype=object)
         k = SST()
         target = np.zeros(shape=(len(X), len(X)))
-        ITS = 3000
+        ITS = 1000
         start_time = datetime.datetime.now()
         for i in range(ITS):
             k.K(X, None, target)

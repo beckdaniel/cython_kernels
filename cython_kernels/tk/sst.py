@@ -175,8 +175,12 @@ class SubsetTreeKernel(object):
         return (K_total, ddecay_total)
 
     def delta(self, node1, node2, delta_matrix, dict1, dict2):
-        #import ipdb
-        #ipdb.set_trace()
+        
+        #CYTHON
+        #########
+        return cy_sst.cy_delta(node1, node2, delta_matrix, dict1, dict2, self._lambda, self._sigma)
+        #########
+
         id1 = node1.node_id
         id2 = node2.node_id
         val = delta_matrix[id1, id2]
@@ -195,32 +199,3 @@ class SubsetTreeKernel(object):
         delta_matrix[id1, id2] = result
         return result, result
 
-    def delta2(self, node_list):
-        #return cy_sst.cy_delta(node_list, self._lambda)
-
-        cache_delta = defaultdict(int) # DP
-        cache_ddecay = defaultdict(int)
-        for node_pair in node_list:
-            node1, node2, child_len = node_pair
-            key = (node1, node2)
-            if child_len == 0:
-                cache_delta[key] = self._lambda
-                cache_ddecay[key] = 1
-            else:
-                prod = 1
-                sum_decay = 0
-                for i in xrange(child_len):
-                    child_key = (tuple(list(node1) + [i]),
-                                 tuple(list(node2) + [i]))
-                    ch_delta = cache_delta[child_key]
-                    ch_ddecay = cache_ddecay[child_key]
-                    prod *= 1 + ch_delta
-                    sum_decay += ch_ddecay / (1 + float(ch_delta))
-                delta_result = self._lambda * prod
-                cache_delta[key] = delta_result
-                cache_ddecay[key] = prod + (delta_result * sum_decay)
-        return (sum(cache_delta.values()),
-                sum(cache_ddecay.values()))
-
-    def delta_cy(self, node_list):
-        return cy_sst.cy_delta(node_list)

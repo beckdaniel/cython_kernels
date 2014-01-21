@@ -1,5 +1,9 @@
 
-from collections import defaultdict
+import numpy as np
+cimport numpy as np
+
+DTYPE = np.double
+ctypedef np.double_t DTYPE_t
 
 def cy_get_node_pair_list(list nodes1, list nodes2):
     cdef list node_pair_list = []
@@ -35,40 +39,29 @@ def cy_get_node_pair_list(list nodes1, list nodes2):
     node_pair_list.sort(key=lambda x: len(x[0]), reverse=True)
     return node_pair_list
 
-def cy_delta(list node_list, double _lambda):
-    cache_delta = defaultdict(int) # DP
-    cache_ddecay = defaultdict(int)
-    cdef list node1
-    cdef list node2
-    cdef unsigned int child_len
-    cdef unsigned int i
-    cdef double prod, sum_decay, ch_delta, ch_ddecay, delta_result
-    cdef double delta_values, ddecay_values
-    delta_values = 0
-    ddecay_values = 0
-    for node_pair in node_list:
-        node1 = list(node_pair[0])
-        node2 = list(node_pair[1])
-        child_len = node_pair[2]
-        #node1, node2, child_len = node_pair
-        key = (node_pair[0], node_pair[1])
-        if child_len == 0:
-            cache_delta[key] = _lambda
-            cache_ddecay[key] = 1
-        else:
-            prod = 1
-            sum_decay = 0
-            for i in xrange(child_len):
-                child_key = (tuple(node1 + [i]),
-                             tuple(node2 + [i]))
-                ch_delta = cache_delta[child_key]
-                ch_ddecay = cache_ddecay[child_key]
-                prod *= 1 + ch_delta
-                sum_decay += ch_ddecay / (1 + float(ch_delta))
-            delta_result = _lambda * prod
-            cache_delta[key] = delta_result
-            delta_values += delta_result
-            ddecay_result = prod + (delta_result * sum_decay)
-            cache_ddecay[key] = ddecay_result
-            ddecay_values += ddecay_result
-    return (delta_values, ddecay_values)
+
+def cy_delta(node1, node2, np.ndarray[DTYPE_t, ndim=2] delta_matrix, dict1, dict2, double _lambda, double _sigma):
+    cdef unsigned int id1, id2, ch1, ch2, i
+    #cdef int i
+    cdef double val, prod, K_result, ddecay_result, result
+    id1 = node1.node_id
+    id2 = node2.node_id
+    val = delta_matrix[id1, id2]
+    if val > 0:
+        return val, val
+    if node1.children_ids == None:
+        delta_matrix[id1, id2] = _lambda
+        return (_lambda, 1)
+    prod = 1
+    children1 = node1.children_ids
+    children2 = node2.children_ids
+    for i in range(len(children1)):
+        ch1 = children1[i]
+        ch2 = children2[i]
+        if dict1[ch1].production == dict2[ch2].production:
+            K_result, ddecay_result = cy_delta(dict1[ch1], dict2[ch2], 
+                                               delta_matrix, dict1, dict2, _lambda, _sigma)
+            prod *= (_sigma + K_result)
+    result = _lambda * prod
+    delta_matrix[id1, id2] = result
+    return result, result
